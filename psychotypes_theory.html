@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Психотипы</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <style>
 :root{--bg:#05050d;--s1:#09091a;--s2:#0d0d20;--bd:#181830;--bd2:#222240;--tx:#e4e0f8;--mu:#3d3b65;--mu2:#6e6ba0;--ok:#34d399;}
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -15,7 +16,7 @@ button{padding:3px 9px;border-radius:4px;font-size:.58rem;cursor:pointer;border:
 button:hover{color:var(--tx);border-color:var(--mu2);}
 button.on{color:var(--tx);background:var(--bd2);}
 .ws{display:grid;grid-template-columns:270px 1fr 340px;height:100%;overflow:hidden;}
-.lp{border-right:1px solid var(--bd);background:var(--s1);display:flex;flex-direction:column;overflow:hidden;}
+.lp{position:relative;border-right:1px solid var(--bd);background:var(--s1);display:flex;flex-direction:column;overflow:hidden;}
 .lp-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--mu);text-align:center;gap:8px;padding:20px;}
 .lp-ei{font-size:2.5rem;opacity:.18;}
 .lp-eh{font-size:.54rem;letter-spacing:.1em;line-height:2;text-transform:uppercase;}
@@ -79,6 +80,42 @@ canvas{display:block;}
 .rca{font-size:.69rem;line-height:1.5;border-left:2px solid var(--mu2);padding-left:8px;font-style:italic;}
 .rst{font-size:.54rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mu2);margin:12px 0 7px;padding-bottom:4px;border-bottom:1px solid var(--bd);}
 ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px;}
+
+/* ─── Mobile bottom sheet & backdrop ─── */
+.mob-handle{display:none;width:36px;height:4px;border-radius:2px;background:var(--bd2);margin:8px auto 4px;flex-shrink:0;}
+.mob-backdrop{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:99;}
+.mob-backdrop.show{display:block;}
+.mob-close{display:none;position:absolute;top:6px;right:10px;background:none;border:none;color:var(--mu2);font-size:1.2rem;cursor:pointer;padding:4px 8px;z-index:1;}
+
+/* ─── Responsive ─── */
+@media(max-width:768px){
+  body{grid-template-rows:auto 1fr;height:100dvh;height:100vh;}
+  header{flex-wrap:wrap;padding:6px 10px;gap:4px 8px;height:auto;min-height:42px;}
+  h1{font-size:.78rem;flex-basis:50%;min-width:0;}
+  .badge{order:1;}
+  .ptabs{order:4;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .ptabs button,.tabs button{padding:5px 11px;font-size:.65rem;}
+  .tabs{order:2;margin-left:auto;}
+  .ws{grid-template-columns:1fr;grid-template-rows:3fr 2fr;}
+  .lp{position:fixed;bottom:0;left:0;right:0;z-index:100;max-height:60vh;border-right:none;border-radius:16px 16px 0 0;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:0 -8px 30px rgba(0,0,0,.5);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  .lp.mob-open{transform:translateY(0);}
+  .lp-empty{display:none!important;}
+  .mob-handle{display:block;}
+  .mob-close{display:block;}
+  .lp-body{padding:8px 14px 20px;}
+  .ca{grid-column:1;grid-row:1;}
+  .rp{grid-column:1;grid-row:2;border-left:none;border-top:1px solid var(--bd);}
+  .leg{padding:5px 8px;gap:3px;}
+  .lc{padding:3px 6px;font-size:.58rem;}
+  .ov{transform:scale(.7);transform-origin:top right;}
+  .hint{display:none;}
+  .hc{display:none!important;}
+}
+@media(max-width:400px){
+  .ws{grid-template-rows:5fr 4fr;}
+  .ov{display:none;}
+  h1{flex-basis:100%;}
+}
 </style>
 </head>
 <body>
@@ -91,8 +128,11 @@ canvas{display:block;}
     <button onclick="showP('reference',this)">Справочник</button>
   </div>
 </header>
+<div class="mob-backdrop" id="mob-backdrop"></div>
 <div class="ws">
-  <div class="lp">
+  <div class="lp" id="lp">
+    <div class="mob-handle"></div>
+    <button class="mob-close" id="mob-close">&times;</button>
     <div class="lp-empty" id="lp-empty">
       <div class="lp-ei">◎</div>
       <div class="lp-eh">Наведи на<br>психотип<br>или стрелку</div>
@@ -261,6 +301,20 @@ cv.addEventListener('mousemove',function(e){
 cv.addEventListener('mouseleave',function(){hovNode=null;hovArrow=null;draw();document.getElementById('hc').classList.remove('show');hideLeft();});
 cv.addEventListener('click',function(e){var c=cxy(e);var node=getNodeAt(c.x,c.y);selNode=selNode===node?null:node;draw();renderPL();});
 
+/* ─── Touch support ─── */
+cv.addEventListener('touchstart',function(e){
+  if(e.touches.length!==1)return;
+  var c=cxy(e);
+  var node=getNodeAt(c.x,c.y);
+  if(node){selNode=selNode===node?null:node;hovNode=node;draw();updateMini(node);showLeftNode(node);renderPL();e.preventDefault();return;}
+  var arrow=getArrowAt(c.x,c.y);
+  if(arrow){hovArrow=arrow;draw();showLeftArrow(arrow);e.preventDefault();return;}
+  selNode=null;hovNode=null;hovArrow=null;draw();hideLeft();renderPL();
+},{passive:false});
+
+document.getElementById('mob-backdrop').addEventListener('click',function(){hideLeft();});
+document.getElementById('mob-close').addEventListener('click',function(){hideLeft();});
+
 function updateMini(id){
   var card=document.getElementById('hc');
   if(!id){card.classList.remove('show');return;}
@@ -280,8 +334,9 @@ function updateMini(id){
   document.getElementById('hcr').innerHTML=h;
 }
 
-function hideLeft(){document.getElementById('lp-body').classList.remove('show');document.getElementById('lp-empty').style.display='';}
-function showLeft(html){var b=document.getElementById('lp-body');b.innerHTML=html;b.classList.add('show');document.getElementById('lp-empty').style.display='none';}
+function isMob(){return window.innerWidth<=768;}
+function hideLeft(){document.getElementById('lp-body').classList.remove('show');document.getElementById('lp-empty').style.display='';document.getElementById('lp').classList.remove('mob-open');document.getElementById('mob-backdrop').classList.remove('show');}
+function showLeft(html){var b=document.getElementById('lp-body');b.innerHTML=html;b.classList.add('show');document.getElementById('lp-empty').style.display='none';if(isMob()){document.getElementById('lp').classList.add('mob-open');document.getElementById('mob-backdrop').classList.add('show');}}
 
 function showLeftNode(id){
   var tc=byId(id);
