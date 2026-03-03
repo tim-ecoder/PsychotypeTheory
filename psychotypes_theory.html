@@ -241,7 +241,7 @@ function draw(){
       var p=pairs[pi];
       var lit=act&&(p.from===act||p.to===act);
       var arlit=hak===(ii+':'+p.from+':'+p.to);
-      var al=act?(lit?'dd':'30'):(arlit?'ff':'70');
+      var al=act?(lit?'dd':'44'):(arlit?'ff':'70');
       var lw=lit?2.5:arlit?3:1.2;
       var p1=npos(ORDER.indexOf(p.from)),p2=npos(ORDER.indexOf(p.to));
       darrow(p1.x,p1.y,p2.x,p2.y,t.color+al,lw,t.dashed,t.sym);
@@ -256,10 +256,10 @@ function draw(){
       ctx.beginPath();ctx.arc(p.x,p.y,nr*2.2,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
     }
     ctx.beginPath();ctx.arc(p.x,p.y,nr,0,Math.PI*2);
-    ctx.fillStyle=act&&!isact?'#07071240':'#0d0d22';ctx.fill();
-    ctx.strokeStyle=(hov||sel)?tc.color:act&&!isact?tc.color+'30':tc.color+'50';
+    ctx.fillStyle='#0d0d22';ctx.fill();
+    ctx.strokeStyle=(hov||sel)?tc.color:act&&!isact?tc.color+'40':tc.color+'50';
     ctx.lineWidth=(hov||sel)?2:1.5;ctx.stroke();
-    var name=nm(id),al2=act&&!isact?'60':'ff';
+    var name=nm(id),al2=act&&!isact?'88':'ff';
     ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#e4e0f8'+al2;
     if(name.length<=7){ctx.font=nr*.5+'px system-ui';ctx.fillText(name,p.x,p.y);}
     else{ctx.font=nr*.41+'px system-ui';var mid=Math.ceil(name.length/2);ctx.fillText(name.slice(0,mid),p.x,p.y-nr*.22);ctx.fillText(name.slice(mid),p.x,p.y+nr*.22);}
