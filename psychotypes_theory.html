@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Психотипы</title>
+<style>
+:root{--bg:#05050d;--s1:#09091a;--s2:#0d0d20;--bd:#181830;--bd2:#222240;--tx:#e4e0f8;--mu:#3d3b65;--mu2:#6e6ba0;--ok:#34d399;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;font-size:13px;height:100vh;display:grid;grid-template-rows:48px 1fr;overflow:hidden;}
+header{display:flex;align-items:center;padding:0 14px;border-bottom:1px solid var(--bd);background:var(--s1);gap:9px;overflow:hidden;}
+h1{font-size:.88rem;font-weight:400;flex:1;white-space:nowrap;}
+.badge{font-size:.55rem;padding:2px 8px;border-radius:20px;background:color-mix(in srgb,var(--ok) 12%,transparent);border:1px solid var(--ok);color:var(--ok);}
+.ptabs,.tabs{display:flex;gap:2px;}
+button{padding:3px 9px;border-radius:4px;font-size:.58rem;cursor:pointer;border:1px solid var(--bd2);background:transparent;color:var(--mu2);transition:all .15s;white-space:nowrap;font-family:inherit;}
+button:hover{color:var(--tx);border-color:var(--mu2);}
+button.on{color:var(--tx);background:var(--bd2);}
+.ws{display:grid;grid-template-columns:270px 1fr 340px;height:100%;overflow:hidden;}
+.lp{border-right:1px solid var(--bd);background:var(--s1);display:flex;flex-direction:column;overflow:hidden;}
+.lp-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--mu);text-align:center;gap:8px;padding:20px;}
+.lp-ei{font-size:2.5rem;opacity:.18;}
+.lp-eh{font-size:.54rem;letter-spacing:.1em;line-height:2;text-transform:uppercase;}
+.lp-body{display:none;flex-direction:column;overflow-y:auto;padding:16px 14px;}
+.lp-body.show{display:flex;}
+.lp-tag{font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:3px;display:inline-block;align-self:flex-start;margin-bottom:9px;}
+.lp-name{font-size:1.25rem;margin-bottom:11px;line-height:1.2;font-weight:600;}
+.lp-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle;}
+.lp-sl{font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mu2);margin-bottom:6px;}
+.lp-desc{font-size:.77rem;line-height:1.65;}
+.lp-note{font-size:.73rem;line-height:1.6;color:var(--mu2);border-left:2px solid var(--bd2);padding-left:9px;margin-top:10px;font-style:italic;}
+.lp-div{height:1px;background:var(--bd);margin:12px 0;}
+.lp-rows{display:flex;flex-direction:column;gap:3px;}
+.lp-row{display:flex;align-items:center;gap:6px;font-size:.71rem;padding:4px 7px;border-radius:5px;background:var(--s2);}
+.lp-row-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.lp-row-arr{font-size:.68rem;color:var(--mu2);}
+.lp-row-a{flex:1;}
+.lp-row-b{color:var(--mu2);}
+.lp-row-t{font-size:.5rem;color:var(--mu2);}
+.lp-pair-head{display:flex;align-items:center;gap:8px;margin:6px 0 8px;font-size:.9rem;font-weight:600;}
+.lp-pair-arr{font-size:.95rem;}
+.lp-pair-box{font-size:.76rem;line-height:1.65;padding:9px 11px;background:var(--s2);border:1px solid var(--bd2);border-radius:6px;color:var(--tx);}
+.ca{position:relative;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 55%,#0c0c25,#05050d 68%);overflow:hidden;}
+canvas{display:block;}
+.hc{position:absolute;top:10px;left:10px;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:10px 12px;min-width:170px;display:none;pointer-events:none;}
+.hc.show{display:block;}
+.hc-nm{font-size:.95rem;font-weight:600;margin-bottom:5px;}
+.hc-r{display:flex;gap:5px;font-size:.69rem;margin-bottom:3px;color:var(--mu2);}
+.hc-r b{color:var(--tx);font-weight:400;}
+.ov{position:absolute;top:10px;right:10px;background:var(--s2);border:1px solid var(--bd2);border-radius:9px;padding:9px 12px;text-align:center;min-width:148px;}
+.ov-pct{font-size:1.7rem;color:var(--ok);line-height:1;}
+.ov-sub{font-size:.49rem;color:var(--mu2);letter-spacing:.1em;margin:3px 0 7px;}
+.ov-row{display:flex;align-items:center;gap:5px;margin-bottom:3px;}
+.ov-lbl{font-size:.59rem;width:86px;text-align:right;}
+.ov-trk{flex:1;height:3px;background:var(--bd);border-radius:2px;overflow:hidden;}
+.ov-fill{height:100%;border-radius:2px;}
+.ov-num{font-size:.54rem;width:22px;}
+.hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:.5rem;color:var(--mu);background:var(--s1);border:1px solid var(--bd);border-radius:20px;padding:3px 9px;white-space:nowrap;}
+.rp{border-left:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;background:var(--s1);}
+.pv{display:flex;flex-direction:column;overflow:hidden;height:100%;}
+.pv.hi{display:none;}
+.leg{display:flex;align-items:center;gap:5px;padding:7px 12px;border-bottom:1px solid var(--bd);flex-wrap:wrap;}
+.lc{display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;border:1px solid var(--bd2);background:transparent;cursor:pointer;font-size:.64rem;color:var(--mu2);}
+.ldot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.pl{flex:1;overflow-y:auto;}
+.pg{border-bottom:1px solid var(--bd);padding:6px 12px 4px;}
+.pgh{font-size:.53rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:5px;}
+.pgsc{margin-left:auto;font-size:.64rem;color:var(--ok);}
+.pi{display:flex;align-items:center;gap:5px;padding:3px;border-radius:4px;margin-bottom:2px;transition:background .1s;}
+.pi:hover,.pi.lit{background:var(--bd);}
+.pi-ic{font-size:.67rem;width:14px;text-align:center;}
+.pi-fr{font-size:.71rem;min-width:75px;font-weight:500;}
+.pi-ar{font-size:.78rem;}
+.pi-to{font-size:.71rem;flex:1;}
+.rs{flex:1;overflow-y:auto;padding:10px 12px;}
+.rc{background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:10px;margin-bottom:8px;}
+.rch{display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+.rcd{width:8px;height:8px;border-radius:50%;}
+.rcn{font-size:.88rem;font-weight:600;}
+.rcp{font-size:.71rem;color:var(--mu2);line-height:1.5;margin-bottom:4px;}
+.rca{font-size:.69rem;line-height:1.5;border-left:2px solid var(--mu2);padding-left:8px;font-style:italic;}
+.rst{font-size:.54rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mu2);margin:12px 0 7px;padding-bottom:4px;border-bottom:1px solid var(--bd);}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Психотипы · Теория взаимодействий</h1>
+  <span class="badge">100%</span>
+  <div class="ptabs" id="ptabs"></div>
+  <div class="tabs">
+    <button class="on" onclick="showP('diagram',this)">Диаграмма</button>
+    <button onclick="showP('reference',this)">Справочник</button>
+  </div>
+</header>
+<div class="ws">
+  <div class="lp">
+    <div class="lp-empty" id="lp-empty">
+      <div class="lp-ei">◎</div>
+      <div class="lp-eh">Наведи на<br>психотип<br>или стрелку</div>
+    </div>
+    <div class="lp-body" id="lp-body"></div>
+  </div>
+  <div class="ca" id="ca">
+    <canvas id="cv"></canvas>
+    <div class="hc" id="hc"><div class="hc-nm" id="hcn"></div><div id="hcr"></div></div>
+    <div class="ov"><div class="ov-pct" id="ovp">100%</div><div class="ov-sub">СООТВЕТСТВИЕ</div><div id="ovb"></div></div>
+    <div class="hint">Наведи · кликни для фиксации</div>
+  </div>
+  <div class="rp">
+    <div class="pv" id="pv-diagram">
+      <div class="leg" id="leg"></div>
+      <div class="pl" id="pl"></div>
+    </div>
+    <div class="pv hi" id="pv-reference">
+      <div class="rs" id="rs"></div>
+    </div>
+  </div>
+</div>
+<script>
+var TYPES=[
+  {id:'PAR',name:'Параноял',color:'#f472b6',desc:'Целеустремлённый, системный, волевой. Строит долгосрочные стратегии, подчиняет окружение своей цели.',adj:'Уязвим не к силе, а к хаосу. Непредсказуемость Шизоида разрушает систему изнутри. Полярен Истероиду: оба борются за влияние через разные стратегии.'},
+  {id:'EPI',name:'Эпилептоид',color:'#a78bfa',desc:'Упорядоченный, накапливающий, регламентирующий. Ценит стабильность и порядок, выстраивает чёткие процедуры.',adj:'Нормирующая функция — антагонист спонтанности. Смысловое обесценивание Гипотима разрушает мотивационную опору.'},
+  {id:'IST',name:'Истероид',color:'#60a5fa',desc:'Демонстративный, экспрессивный, ориентированный на признание. Живёт в контакте с аудиторией.',adj:null},
+  {id:'EMO',name:'Эмотив',color:'#34d399',desc:'Чувствительный, эмпатичный. Тонко реагирует на эмоциональный фон, избегает конфликтов.',adj:'Аффективный потенциал — накопленный заряд. Переполнение порождает компенсаторную активность гипертимного типа.'},
+  {id:'GIP',name:'Гипертим',color:'#fbbf24',desc:'Активный, оптимистичный, инициативный. Высокий уровень энергии, тяга к новизне.',adj:'Уязвим к жёстким регламентам. Под давлением эпилептоидного контроля спонтанность угасает.'},
+  {id:'SHZ',name:'Шизоид',color:'#818cf8',desc:'Интровертный, концептуальный. Нестандартная логика, живёт во внутреннем мире.',adj:'Нелинейность — деструктивная сила для систем контроля. Полярен Тревожному: осторожность Тревожного структурирует хаос Шизоида.'},
+  {id:'GOT',name:'Гипотим',color:'#94a3b8',desc:'Пессимистичный, осторожный, склонный к депрессивным реакциям. Низкий фон настроения.',adj:'Механизм угнетения — смысловое обесценивание. Пессимизм подрывает смысл накопления усилий.'},
+  {id:'TRV',name:'Тревожный',color:'#fb923c',desc:'Осторожный, предусмотрительный. Высокая чувствительность к риску, ориентация на избегание угроз.',adj:null},
+];
+var ORDER=['PAR','EPI','IST','EMO','GIP','SHZ','GOT','TRV'];
+var N=8;
+function byId(id){return TYPES.find(function(t){return t.id===id;});}
+function nm(id){var t=byId(id);return t?t.name:id;}
+
+var M=[];
+for(var i=0;i<N;i++){M.push([]);for(var j=0;j<N;j++)M[i].push(0);}
+function ms(a,b,v){var ai=ORDER.indexOf(a),bi=ORDER.indexOf(b);if(ai>=0&&bi>=0)M[ai][bi]=v;}
+ms('PAR','EPI',2);ms('EPI','IST',2);ms('IST','EMO',2);ms('EMO','GIP',2);
+ms('GIP','SHZ',2);ms('SHZ','GOT',2);ms('GOT','TRV',2);ms('TRV','PAR',2);
+ms('PAR','GIP',2);ms('GIP','PAR',2);ms('EPI','SHZ',2);ms('SHZ','EPI',2);
+ms('IST','GOT',2);ms('GOT','IST',2);ms('EMO','TRV',2);ms('TRV','EMO',2);
+ms('PAR','EMO',2);ms('EPI','GIP',2);ms('IST','SHZ',2);ms('EMO','GOT',2);
+ms('GIP','TRV',2);ms('SHZ','PAR',2);ms('GOT','EPI',2);ms('TRV','IST',2);ms('PAR','GOT',2);
+ms('PAR','IST',2);ms('IST','PAR',2);ms('IST','GIP',2);ms('GIP','IST',2);
+ms('GIP','GOT',2);ms('GOT','GIP',2);ms('GOT','PAR',2);ms('PAR','GOT',2);
+ms('EPI','EMO',2);ms('EMO','EPI',2);ms('EMO','SHZ',2);ms('SHZ','EMO',2);
+ms('SHZ','TRV',2);ms('TRV','SHZ',2);ms('TRV','EPI',2);ms('EPI','TRV',2);
+function ps(a,b){return M[ORDER.indexOf(a)][ORDER.indexOf(b)];}
+function sym(a,b){return Math.round((ps(a,b)+ps(b,a))/2);}
+
+var PD={};
+PD['PAR:EPI']='Параноял задаёт цель и долгосрочный контекст — Эпилептоид получает смысловую рамку, внутри которой его регламентирующая функция становится продуктивной. Без цели Параноляла Эпилептоид накапливает порядок ради порядка.';
+PD['EPI:IST']='Эпилептоид выстраивает структуру и правила — Истероид получает сцену: чёткий формат, в котором экспрессия обретает форму. Структура освобождает Истероида от хаоса и позволяет сосредоточиться на игре.';
+PD['IST:EMO']='Истероид создаёт эмоционально насыщенный климат — Эмотив резонирует с ним глубже всех. Экспрессия Истероида пробуждает в Эмотиве переживания, которые тот не смог бы вызвать самостоятельно.';
+PD['EMO:GIP']='Эмотив накапливает аффективный потенциал — при переполнении он разряжается в компенсаторную активность гипертимного типа. Эмоциональный заряд Эмотива становится топливом для энергии Гипертима.';
+PD['GIP:SHZ']='Гипертим создаёт зону свободного эксперимента и новизны — Шизоид получает пространство для нестандартных идей без требования немедленного результата. Энергия Гипертима снимает с Шизоида социальное давление.';
+PD['SHZ:GOT']='Шизоид разрушает иллюзии своей нелинейной логикой — Гипотим получает интеллектуальное обоснование своего пессимизма. Концептуальный реализм Шизоида подтверждает правоту Гипотима.';
+PD['GOT:TRV']='Гипотим создаёт атмосферу осторожности и предупреждений — Тревожный воспринимает это как подтверждение своих страхов. Пессимизм Гипотима активирует и усиливает тревожную бдительность.';
+PD['TRV:PAR']='Тревожный накапливает сигналы угроз и рисков — Параноял перерабатывает их в стратегические предостережения и защитные системы. Осторожность Тревожного питает параноидальную бдительность.';
+PD['GIP:PAR']='Параноял даёт Гипертиму направление и стратегическую цель, Гипертим даёт Параноялу живую энергию и инициативу. Воля встречает движение — системность получает скорость.';
+PD['EPI:SHZ']='Эпилептоид строит структуру, Шизоид наполняет её нестандартным содержанием. Жёсткий каркас удерживает хаотичные идеи Шизоида, а идеи Шизоида оживляют мёртвый регламент Эпилептоида.';
+PD['IST:GOT']='Истероид демонстрирует успех и подъём, Гипотим удерживает реализм и предотвращает переоценку. Экспрессия сдерживается трезвостью, а депрессия освещается признанием.';
+PD['EMO:TRV']='Эмотив улавливает эмоциональный фон, Тревожный — угрозы среды. Эмотив даёт тепло, Тревожный — осторожность. Вместе создают защищённое, чуткое пространство.';
+PD['PAR:EMO']='Параноял видит в чувствах Эмотива иррациональный шум, мешающий стратегии. Он системно вытесняет чувствительность из пространства взаимодействия — Эмотив теряет право на внутренний опыт и замолкает.';
+PD['EPI:GIP']='Эпилептоид накладывает регламент на каждое действие Гипертима. Правила убивают импульс: Гипертим теряет спонтанность под давлением процедур и постепенно угасает.';
+PD['IST:SHZ']='Истероид требует социальной видимости и одобрения — именно того, что Шизоид не может и не хочет давать. Демонстративность Истероида обесценивает внутренний мир Шизоида, заставляя его закрываться.';
+PD['EMO:GOT']='Эмотив несёт сочувствие, но именно оно питает Гипотима: внимание к страданию делает страдание устойчивым. Эмпатия без границ превращается в ресурс для депрессивной фиксации.';
+PD['GIP:TRV']='Безудержный оптимизм Гипертима воспринимается Тревожным как угроза: темп слишком высок, риски не просчитаны. Гипертим блокирует осторожность Тревожного, не оставляя пространства для предосторожностей.';
+PD['SHZ:PAR']='Шизоид действует по логике, которую Параноял не может предсказать или включить в систему. Непредсказуемость разрушает стратегическую конструкцию — Параноял теряет контроль над ситуацией.';
+PD['GOT:EPI']='Гипотим обесценивает результат: «это всё равно не имеет смысла». Именно перспектива значимого результата удерживает Эпилептоида в работе — без неё накопление усилий теряет основу.';
+PD['TRV:IST']='Тревожный постоянно указывает на риски и возможные провалы — именно публичного провала Истероид боится больше всего. Осторожность Тревожного подрывает уверенность Истероида перед аудиторией.';
+PD['IST:PAR']='Параноял и Истероид — два типа борьбы за влияние. Параноял действует через цель и систему, Истероид — через образ и аудиторию. Каждый видит в другом альтернативный, но понятный путь к власти над ситуацией.';
+PD['IST:GIP']='Истероид и Гипертим — оба экстраверты с высокой экспрессией. Истероид нуждается в аудитории, Гипертим создаёт поток энергии. Вместе они усиливают социальную интенсивность любого пространства.';
+PD['GIP:GOT']='Гипертим и Гипотим — прямые противоположности по энергетическому заряду. Их полярность создаёт постоянное притяжение: каждый воплощает то, что другому недоступно. Встреча возможного с невозможным.';
+PD['GOT:PAR']='Гипотим обесценивает цели Параноляла — «всё это не стоит усилий». Параноял вытягивает Гипотима смыслом и волевым давлением. Постоянное напряжение между бессмысленностью и целью.';
+PD['EPI:EMO']='Эпилептоид строит структуру и регламент, Эмотив несёт чувство и атмосферу. Они взаимно непонятны, но дополняют: структура без чувства мертва, чувство без структуры хаотично.';
+PD['EMO:SHZ']='Эмотив и Шизоид — оба интроверты с богатым внутренним миром. Эмотив переживает, Шизоид концептуализирует. Между ними возникает особое понимание — через резонанс внутренних пространств, без слов.';
+PD['SHZ:TRV']='Непредсказуемость Шизоида активирует тревогу — но именно осторожность Тревожного структурирует его хаос. В ответ Шизоид расширяет горизонт Тревожного за пределы привычных угроз.';
+PD['EPI:TRV']='Тревожный ищет надёжную структуру — Эпилептоид её создаёт. Правила и регламент Эпилептоида становятся для Тревожного защитой от непредсказуемости. Порядок как антитревожное средство.';
+
+function getPD(from,to,issym){
+  var k=from+':'+to;
+  if(PD[k])return PD[k];
+  if(issym){var k2=to+':'+from;if(PD[k2])return PD[k2];}
+  return null;
+}
+
+var IDESCS={
+  classic:[
+    {desc:'Каждый тип порождает следующий — передаёт энергию, создаёт условия. Направленный цикл развития.',note:'ПАР→ЭПИ→ИСТ→ЭМО→ГИП→ШИЗ→ГОТ→ТРВ→ПАР'},
+    {desc:'Противоположные через круг образуют пары сотрудничества. Взаимное дополнение без конкуренции.',note:'4 пары: ПАР–ГИП, ЭПИ–ШИЗ, ИСТ–ГОТ, ЭМО–ТРВ'},
+    {desc:'Один тип системно подавляет другой. Ключевые механизмы одного разрушают механизмы другого.',note:'Угнетение однонаправленно и устойчиво.'},
+    {desc:'Два квадрата: экстравертный (ПАР–ИСТ–ГИП–ГОТ) и интровертный (ЭПИ–ЭМО–ШИЗ–ТРВ). Притяжение через различие.',note:'Каждый видит в полярном партнёре то, чего не может достичь самостоятельно.'},
+  ],
+  love:[
+    {desc:'Направленное притяжение: один тип тянется к следующему.',note:'Влечение однонаправленно и создаёт динамику погони.'},
+    {desc:'Взаимная любовь между противоположными типами. Отличие создаёт глубину.',note:'4 пары взаимной любви.'},
+    {desc:'Один тип болезненно воспринимает успех другого.',note:'Зависть однонаправленна, но жертва ощущает давление.'},
+    {desc:'Взаимное притяжение внутри квадратов.',note:'Может оставаться неразрешённым напряжением.'},
+  ],
+  energy:[
+    {desc:'Один тип трансформирует энергию другого — принимает в одной форме, передаёт в изменённой.',note:'Трансформация необратима.'},
+    {desc:'Противоположные типы входят в резонанс — взаимно усиливают друг друга.',note:'Наиболее продуктивные пары.'},
+    {desc:'Один тип поглощает энергию другого без возврата.',note:'Истощает источник незаметно для обоих.'},
+    {desc:'Энергетическая полярность внутри квадратов. Напряжение — источник мощи.',note:'Плюс и минус притягиваются, создавая ток.'},
+  ],
+  therapy:[
+    {desc:'Каждый тип компенсирует дефицит следующего.',note:'При осознанности — поддержка. Без неё — созависимость.'},
+    {desc:'Противоположные типы могут интегрироваться, объединив сильные стороны.',note:'Требует зрелости обоих.'},
+    {desc:'Один тип проецирует на другой теневые качества.',note:'Осознание проекции — ключевой шаг.'},
+    {desc:'Полярные позиции внутри квадрата как части одного целого.',note:'Интеграция полярностей — центральная тема гештальт-подхода.'},
+  ],
+};
+
+var PRESETS={
+  classic:{label:'Классика',types:[
+    {name:'Порождение',color:'#f472b6',step:1,sym:false,dashed:false},
+    {name:'Сотрудничество',color:'#34d399',step:4,sym:true,dashed:false},
+    {name:'Угнетение',color:'#fb923c',step:3,sym:false,dashed:true},
+    {name:'Полярность',color:'#818cf8',step:2,sym:true,dashed:false},
+  ]},
+  love:{label:'Любовь',types:[
+    {name:'Влечение',color:'#f472b6',step:1,sym:false,dashed:false},
+    {name:'Любовь',color:'#34d399',step:4,sym:true,dashed:false},
+    {name:'Зависть',color:'#fb923c',step:3,sym:false,dashed:true},
+    {name:'Притяжение',color:'#818cf8',step:2,sym:true,dashed:false},
+  ]},
+  energy:{label:'Энергия',types:[
+    {name:'Трансформация',color:'#f472b6',step:1,sym:false,dashed:false},
+    {name:'Резонанс',color:'#34d399',step:4,sym:true,dashed:false},
+    {name:'Поглощение',color:'#fb923c',step:3,sym:false,dashed:true},
+    {name:'Полярность',color:'#818cf8',step:2,sym:true,dashed:false},
+  ]},
+  therapy:{label:'Коррекция',types:[
+    {name:'Компенсация',color:'#60a5fa',step:1,sym:false,dashed:false},
+    {name:'Интеграция',color:'#34d399',step:4,sym:true,dashed:false},
+    {name:'Проекция',color:'#fb923c',step:3,sym:false,dashed:true},
+    {name:'Полярность',color:'#818cf8',step:2,sym:true,dashed:false},
+  ]},
+};
+
+var preset='classic';
+var IX=JSON.parse(JSON.stringify(PRESETS.classic.types));
+var filters=[true,true,true,true];
+var hovNode=null,hovArrow=null,selNode=null;
+
+var cv=document.getElementById('cv');
+var ctx=cv.getContext('2d');
+
+function resize(){
+  var a=document.getElementById('ca');
+  var w=a.offsetWidth||500,h=a.offsetHeight||500;
+  var s=Math.min(w-16,h-16,560);
+  cv.width=Math.max(s,160);cv.height=Math.max(s,160);
+  draw();
+}
+window.addEventListener('resize',resize);
+
+function npos(i){var R=cv.width*.34,a=(i/N)*Math.PI*2-Math.PI/2;return{x:cv.width/2+R*Math.cos(a),y:cv.height/2+R*Math.sin(a)};}
+function NR(){return cv.width*.064;}
+
+function darrow(x1,y1,x2,y2,c,lw,dash,bi){
+  var nr=NR(),dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);
+  if(len<1)return;
+  var ux=dx/len,uy=dy/len;
+  var sx=x1+ux*(nr+2),sy=y1+uy*(nr+2),ex=x2-ux*(nr+2),ey=y2-uy*(nr+2);
+  ctx.save();ctx.strokeStyle=c;ctx.lineWidth=lw;
+  ctx.setLineDash(dash?[5,4]:[]);
+  ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(ex,ey);ctx.stroke();
+  ctx.setLineDash([]);
+  var hl=8,ha=.38;
+  function hd(px,py,ax,ay){var ang=Math.atan2(py-ay,px-ax);ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px-hl*Math.cos(ang-ha),py-hl*Math.sin(ang-ha));ctx.lineTo(px-hl*Math.cos(ang+ha),py-hl*Math.sin(ang+ha));ctx.closePath();ctx.fillStyle=c;ctx.fill();}
+  hd(ex,ey,sx,sy);if(bi)hd(sx,sy,ex,ey);
+  ctx.restore();
+}
+
+function gpairs(ii){
+  var t=IX[ii],pairs=[],seen={};
+  for(var i=0;i<N;i++){
+    var j=(i+t.step)%N,a=ORDER[i],b=ORDER[j];
+    if(t.sym){var k=[a,b].sort().join('-');if(seen[k])continue;seen[k]=1;}
+    pairs.push({from:a,to:b,ii:ii});
+  }
+  return pairs;
+}
+function sc(p){var t=IX[p.ii];return t.sym?sym(p.from,p.to):ps(p.from,p.to);}
+
+function draw(){
+  var W=cv.width,H=cv.height,nr=NR();
+  ctx.clearRect(0,0,W,H);
+  ctx.beginPath();ctx.arc(W/2,H/2,W*.34,0,Math.PI*2);ctx.strokeStyle='#18183030';ctx.lineWidth=1;ctx.stroke();
+  var act=hovNode||selNode;
+  var hak=hovArrow?(hovArrow.ii+':'+hovArrow.from+':'+hovArrow.to):null;
+  for(var ii=0;ii<IX.length;ii++){
+    if(!filters[ii])continue;
+    var t=IX[ii];
+    var pairs=gpairs(ii);
+    for(var pi=0;pi<pairs.length;pi++){
+      var p=pairs[pi];
+      var lit=act&&(p.from===act||p.to===act);
+      var arlit=hak===(ii+':'+p.from+':'+p.to);
+      var al=act?(lit?'dd':'0c'):(arlit?'ff':'70');
+      var lw=lit?2.5:arlit?3:1.2;
+      var p1=npos(ORDER.indexOf(p.from)),p2=npos(ORDER.indexOf(p.to));
+      darrow(p1.x,p1.y,p2.x,p2.y,t.color+al,lw,t.dashed,t.sym);
+    }
+  }
+  for(var i=0;i<N;i++){
+    var id=ORDER[i],p=npos(i),tc=byId(id);
+    var hov=id===hovNode,sel=id===selNode,isact=act&&id===act;
+    if(hov||sel){
+      var g=ctx.createRadialGradient(p.x,p.y,nr*.3,p.x,p.y,nr*2.2);
+      g.addColorStop(0,tc.color+'1c');g.addColorStop(1,tc.color+'00');
+      ctx.beginPath();ctx.arc(p.x,p.y,nr*2.2,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+    }
+    ctx.beginPath();ctx.arc(p.x,p.y,nr,0,Math.PI*2);
+    ctx.fillStyle=act&&!isact?'#07071270':'#0d0d22';ctx.fill();
+    ctx.strokeStyle=(hov||sel)?tc.color:act&&!isact?'#10102a':tc.color+'50';
+    ctx.lineWidth=(hov||sel)?2:1.5;ctx.stroke();
+    var name=nm(id),al2=act&&!isact?'28':'ff';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#e4e0f8'+al2;
+    if(name.length<=7){ctx.font=nr*.5+'px system-ui';ctx.fillText(name,p.x,p.y);}
+    else{ctx.font=nr*.41+'px system-ui';var mid=Math.ceil(name.length/2);ctx.fillText(name.slice(0,mid),p.x,p.y-nr*.22);ctx.fillText(name.slice(mid),p.x,p.y+nr*.22);}
+  }
+}
+
+function getNodeAt(x,y){var nr=NR();for(var i=0;i<N;i++){var p=npos(i),dx=x-p.x,dy=y-p.y;if(dx*dx+dy*dy<=nr*nr)return ORDER[i];}return null;}
+function pdist(px,py,ax,ay,bx,by){var dx=bx-ax,dy=by-ay,l2=dx*dx+dy*dy;if(l2===0)return Math.sqrt((px-ax)*(px-ax)+(py-ay)*(py-ay));var t=Math.max(0,Math.min(1,((px-ax)*dx+(py-ay)*dy)/l2));return Math.sqrt((px-(ax+t*dx))*(px-(ax+t*dx))+(py-(ay+t*dy))*(py-(ay+t*dy)));}
+function getArrowAt(x,y){
+  var nr=NR(),best=null,bd=999;
+  for(var ii=0;ii<IX.length;ii++){
+    if(!filters[ii])continue;
+    var pairs=gpairs(ii);
+    for(var pi=0;pi<pairs.length;pi++){
+      var p=pairs[pi];
+      var p1=npos(ORDER.indexOf(p.from)),p2=npos(ORDER.indexOf(p.to));
+      var ux=p2.x-p1.x,uy=p2.y-p1.y,len=Math.sqrt(ux*ux+uy*uy);if(len<1)continue;
+      var sx=p1.x+(ux/len)*(nr+2),sy=p1.y+(uy/len)*(nr+2),ex=p2.x-(ux/len)*(nr+2),ey=p2.y-(uy/len)*(nr+2);
+      var d=pdist(x,y,sx,sy,ex,ey);
+      if(d<12&&d<bd){bd=d;best={ii:ii,from:p.from,to:p.to};}
+    }
+  }
+  return best;
+}
+function cxy(e){var r=cv.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return{x:(s.clientX-r.left)*(cv.width/r.width),y:(s.clientY-r.top)*(cv.height/r.height)};}
+
+cv.addEventListener('mousemove',function(e){
+  var c=cxy(e);
+  var node=getNodeAt(c.x,c.y);
+  if(node!==hovNode){hovNode=node;draw();updateMini(node);}
+  if(node){hovArrow=null;showLeftNode(node);}
+  else{
+    var arrow=getArrowAt(c.x,c.y);
+    var ak=arrow?(arrow.ii+':'+arrow.from+':'+arrow.to):null;
+    var pk=hovArrow?(hovArrow.ii+':'+hovArrow.from+':'+hovArrow.to):null;
+    if(ak!==pk){hovArrow=arrow;draw();if(arrow)showLeftArrow(arrow);else hideLeft();}
+  }
+});
+cv.addEventListener('mouseleave',function(){hovNode=null;hovArrow=null;draw();document.getElementById('hc').classList.remove('show');hideLeft();});
+cv.addEventListener('click',function(e){var c=cxy(e);var node=getNodeAt(c.x,c.y);selNode=selNode===node?null:node;draw();renderPL();});
+
+function updateMini(id){
+  var card=document.getElementById('hc');
+  if(!id){card.classList.remove('show');return;}
+  card.classList.add('show');document.getElementById('hcn').textContent=nm(id);
+  var h='';
+  for(var ii=0;ii<IX.length;ii++){
+    var t=IX[ii],pairs=gpairs(ii);
+    if(t.sym){
+      var pp=pairs.filter(function(p){return p.from===id||p.to===id;});
+      if(pp.length)h+='<div class="hc-r"><span style="color:'+t.color+'">'+t.name+':</span><b>'+pp.map(function(p){return nm(p.from===id?p.to:p.from);}).join(', ')+'</b></div>';
+    }else{
+      var out=pairs.filter(function(p){return p.from===id;}),inn=pairs.filter(function(p){return p.to===id;});
+      if(out.length)h+='<div class="hc-r"><span style="color:'+t.color+'">'+t.name+' &rarr;:</span><b>'+out.map(function(p){return nm(p.to);}).join(', ')+'</b></div>';
+      if(inn.length)h+='<div class="hc-r"><span style="color:'+t.color+'">&larr; '+t.name+':</span><b>'+inn.map(function(p){return nm(p.from);}).join(', ')+'</b></div>';
+    }
+  }
+  document.getElementById('hcr').innerHTML=h;
+}
+
+function hideLeft(){document.getElementById('lp-body').classList.remove('show');document.getElementById('lp-empty').style.display='';}
+function showLeft(html){var b=document.getElementById('lp-body');b.innerHTML=html;b.classList.add('show');document.getElementById('lp-empty').style.display='none';}
+
+function showLeftNode(id){
+  var tc=byId(id);
+  var rows='';
+  for(var ii=0;ii<IX.length;ii++){
+    var t=IX[ii],pairs=gpairs(ii);
+    for(var pi=0;pi<pairs.length;pi++){
+      var p=pairs[pi],partner=null,arr='';
+      if(p.from===id){partner=p.to;arr=t.sym?'&#8596;':'&rarr;';}
+      else if(p.to===id&&!t.sym){partner=p.from;arr='&larr;';}
+      if(partner)rows+='<div class="lp-row"><div class="lp-row-dot" style="background:'+t.color+'"></div><span class="lp-row-arr">'+arr+'</span><span class="lp-row-a">'+nm(partner)+'</span><span class="lp-row-t">'+t.name+'</span></div>';
+    }
+  }
+  showLeft(
+    '<div class="lp-tag" style="background:color-mix(in srgb,'+tc.color+' 12%,transparent);color:'+tc.color+';border:1px solid '+tc.color+'40">ПСИХОТИП</div>'
+    +'<div class="lp-name"><span class="lp-dot" style="background:'+tc.color+'"></span>'+tc.name+'</div>'
+    +'<div class="lp-sl">Характеристика</div>'
+    +'<div class="lp-desc">'+tc.desc+'</div>'
+    +(tc.adj?'<div class="lp-note">'+tc.adj+'</div>':'')
+    +(rows?'<div class="lp-div"></div><div class="lp-sl">Взаимодействия</div><div class="lp-rows">'+rows+'</div>':'')
+  );
+}
+
+function showLeftArrow(arrow){
+  var t=IX[arrow.ii];
+  var td=(IDESCS[preset]||IDESCS.classic)[arrow.ii]||{desc:'',note:''};
+  var pairDesc=getPD(arrow.from,arrow.to,t.sym);
+  var ftc=byId(arrow.from),ttc=byId(arrow.to);
+  var pairs=gpairs(arrow.ii);
+  var ph=pairs.map(function(p){
+    var hi=p.from===arrow.from&&p.to===arrow.to;
+    return '<div class="lp-row" style="'+(hi?'background:color-mix(in srgb,'+t.color+' 16%,transparent)':'')+'">'
+      +'<div class="lp-row-dot" style="background:'+t.color+'"></div>'
+      +'<span class="lp-row-a" style="color:'+(hi?t.color:'var(--tx)')+'">'+nm(p.from)+'</span>'
+      +'<span class="lp-row-arr">'+(t.sym?'&#8596;':'&rarr;')+'</span>'
+      +'<span class="lp-row-b">'+nm(p.to)+'</span>'
+      +'</div>';
+  }).join('');
+  var pairBlock=pairDesc
+    ?'<div class="lp-div"></div>'
+     +'<div class="lp-pair-head">'
+       +'<span style="color:'+(ftc?ftc.color:'#fff')+'">'+nm(arrow.from)+'</span>'
+       +'<span class="lp-pair-arr" style="color:'+t.color+'">'+(t.sym?'↔':'→')+'</span>'
+       +'<span style="color:'+(ttc?ttc.color:'#fff')+'">'+nm(arrow.to)+'</span>'
+     +'</div>'
+     +'<div class="lp-pair-box">'+pairDesc+'</div>'
+    :'';
+  showLeft(
+    '<div class="lp-tag" style="background:color-mix(in srgb,'+t.color+' 12%,transparent);color:'+t.color+';border:1px solid '+t.color+'40">'+(t.sym?'↔':'→')+' '+t.name+'</div>'
+    +'<div class="lp-sl">Тип взаимодействия</div>'
+    +'<div class="lp-desc">'+td.desc+'</div>'
+    +'<div class="lp-note">'+td.note+'</div>'
+    +pairBlock
+    +'<div class="lp-div"></div>'
+    +'<div class="lp-sl">Все пары</div>'
+    +'<div class="lp-rows">'+ph+'</div>'
+  );
+}
+
+function renderOV(){
+  var el=document.getElementById('ovb');el.innerHTML='';
+  var tot=0,mx=0;
+  IX.forEach(function(t,ii){
+    var pairs=gpairs(ii),s=0,m=pairs.length*2;
+    pairs.forEach(function(p){s+=sc(p);});
+    tot+=s;mx+=m;
+    var row=document.createElement('div');row.className='ov-row';
+    row.innerHTML='<span class="ov-lbl" style="color:'+t.color+'">'+t.name+'</span><div class="ov-trk"><div class="ov-fill" style="width:'+(m?s/m*100:0)+'%;background:'+t.color+'"></div></div><span class="ov-num" style="color:'+t.color+'">'+s+'/'+m+'</span>';
+    el.appendChild(row);
+  });
+  var pct=mx?Math.round(tot/mx*100):0;
+  var pe=document.getElementById('ovp');pe.textContent=pct+'%';pe.style.color=pct>=95?'#34d399':pct>=80?'#fbbf24':'#f87171';
+}
+
+function renderLeg(){
+  var row=document.getElementById('leg');row.innerHTML='';
+  IX.forEach(function(t,i){
+    var btn=document.createElement('button');btn.className='lc';
+    function setOn(){btn.style.cssText='border-color:'+t.color+';background:color-mix(in srgb,'+t.color+' 10%,transparent);color:'+t.color;}
+    function setOff(){btn.style.cssText='border-color:var(--bd2);background:transparent;color:var(--mu2)';}
+    setOn();
+    btn.innerHTML='<div class="ldot" style="background:'+t.color+'"></div>'+t.name;
+    btn.onclick=function(){filters[i]=!filters[i];filters[i]?setOn():setOff();draw();renderPL();};
+    row.appendChild(btn);
+  });
+}
+
+function renderPL(){
+  var list=document.getElementById('pl');list.innerHTML='';
+  var act=selNode||hovNode;
+  for(var ii=0;ii<IX.length;ii++){
+    if(!filters[ii])continue;
+    var t=IX[ii],pairs=gpairs(ii);
+    var g=document.createElement('div');g.className='pg';
+    var hd=document.createElement('div');hd.className='pgh';hd.style.color=t.color;
+    var good=0;pairs.forEach(function(p){if(sc(p)===2)good++;});
+    hd.innerHTML=t.name+' <span style="color:var(--mu2);font-size:.46rem">шаг '+t.step+'</span><span class="pgsc">'+good+'/'+pairs.length+'</span>';
+    g.appendChild(hd);
+    for(var pi=0;pi<pairs.length;pi++){
+      var p=pairs[pi],s=sc(p),lit=act&&(p.from===act||p.to===act);
+      var item=document.createElement('div');item.className='pi'+(lit?' lit':'');
+      item.innerHTML='<span class="pi-ic">'+(s===2?'✅':s===1?'⚠️':'❌')+'</span><span class="pi-fr" style="color:'+t.color+'">'+nm(p.from)+'</span><span class="pi-ar" style="color:'+t.color+'">'+(t.sym?'↔':'→')+'</span><span class="pi-to">'+nm(p.to)+'</span>';
+      (function(pf){
+        item.addEventListener('mouseenter',function(){selNode=pf;draw();});
+        item.addEventListener('mouseleave',function(){selNode=null;draw();});
+      })(p.from);
+      g.appendChild(item);
+    }
+    list.appendChild(g);
+  }
+}
+
+function renderRef(){
+  var rs=document.getElementById('rs');rs.innerHTML='';
+  var t=document.createElement('div');t.className='rst';t.textContent='Психотипы';rs.appendChild(t);
+  TYPES.forEach(function(tc){
+    var c=document.createElement('div');c.className='rc';
+    c.innerHTML='<div class="rch"><div class="rcd" style="background:'+tc.color+'"></div><span class="rcn">'+tc.name+'</span></div><div class="rcp">'+tc.desc+'</div>'+(tc.adj?'<div class="rca">'+tc.adj+'</div>':'');
+    rs.appendChild(c);
+  });
+}
+
+function renderPT(){
+  var w=document.getElementById('ptabs');w.innerHTML='';
+  Object.keys(PRESETS).forEach(function(k){
+    var p=PRESETS[k];
+    var btn=document.createElement('button');
+    if(k===preset)btn.className='on';
+    btn.textContent=p.label;
+    btn.onclick=function(){
+      preset=k;IX=JSON.parse(JSON.stringify(PRESETS[k].types));filters=new Array(IX.length).fill(true);
+      hovNode=null;hovArrow=null;selNode=null;hideLeft();
+      renderPT();renderLeg();renderOV();renderPL();draw();
+    };
+    w.appendChild(btn);
+  });
+}
+
+function showP(n,btn){
+  document.querySelectorAll('.pv').forEach(function(v){v.classList.add('hi');});
+  document.getElementById('pv-'+n).classList.remove('hi');
+  document.querySelectorAll('.tabs button').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');
+}
+
+window.addEventListener('load',function(){
+  renderPT();renderLeg();renderRef();
+  resize();renderOV();renderPL();
+});
+</script>
+</body>
+</html>
