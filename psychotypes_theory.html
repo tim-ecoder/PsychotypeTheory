@@ -259,6 +259,19 @@ function sc(p){
   if(s>=2)return 1;
   return 0;
 }
+function pairLvl(p){
+  var t=IX[p.ii];
+  var base=t.sym?sym(p.from,p.to):ps(p.from,p.to);
+  if(base===0)return 'nodata';
+  return criLvl(p.from,p.to,t.sym)||'nodata';
+}
+function lvlIcon(lv){
+  if(lv==='research'||lv==='literature')return '\u2705';
+  if(lv==='plausible')return '\uD83D\uDFE1';
+  if(lv==='possible')return '\uD83D\uDD38';
+  if(lv==='refuted')return '\u274C';
+  return '\u26A0\uFE0F';
+}
 
 function draw(){
   var W=cv.width,H=cv.height,nr=NR();
@@ -494,7 +507,7 @@ function renderPL(){
       var p=pairs[pi],s=sc(p),lit=act&&(p.from===act||p.to===act);
       var item=document.createElement('div');item.className='pi'+(lit?' lit':'');
       item.setAttribute('data-pair',ii+':'+p.from+':'+p.to);
-      item.innerHTML='<span class="pi-ic">'+(s===2?'✅':s===1?'⚠️':'❌')+'</span><span class="pi-fr" style="color:'+t.color+'">'+nm(p.from)+'</span><span class="pi-ar" style="color:'+t.color+'">'+(t.sym?'↔':'→')+'</span><span class="pi-to">'+nm(p.to)+'</span>';
+      item.innerHTML='<span class="pi-ic">'+lvlIcon(pairLvl(p))+'</span><span class="pi-fr" style="color:'+t.color+'">'+nm(p.from)+'</span><span class="pi-ar" style="color:'+t.color+'">'+(t.sym?'↔':'→')+'</span><span class="pi-to">'+nm(p.to)+'</span>';
       (function(pp,iii){
         item.addEventListener('mouseenter',function(){if(isMob())return;hovArrow={ii:iii,from:pp.from,to:pp.to};hovNode=null;draw();showLeftArrow(hovArrow);});
         item.addEventListener('mouseleave',function(){if(isMob())return;hovArrow=null;draw();hideLeft();});
