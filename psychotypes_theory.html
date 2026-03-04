@@ -238,7 +238,10 @@ function gpairs(ii){
 }
 function criLvl(from,to,issym){
   if(typeof CRITIQUE==='undefined'||!CRITIQUE.pairs)return null;
-  var k=from+':'+to,cr=CRITIQUE.pairs[k];
+  var k=from+':'+to;
+  var cpls=CRITIQUE.conceptPairLevels&&CRITIQUE.conceptPairLevels[preset];
+  if(cpls){if(cpls[k])return cpls[k];if(issym&&cpls[to+':'+from])return cpls[to+':'+from];}
+  var cr=CRITIQUE.pairs[k];
   if(!cr&&issym){cr=CRITIQUE.pairs[to+':'+from];}
   return cr?cr.level:null;
 }

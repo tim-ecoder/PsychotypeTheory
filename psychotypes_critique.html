@@ -208,9 +208,16 @@ function getPD(from,to,issym){
 function getCritPair(from,to,issym){
   if(!CRITIQUE||!CRITIQUE.pairs)return null;
   var k=from+':'+to;
-  if(CRITIQUE.pairs[k])return CRITIQUE.pairs[k];
-  if(issym){var k2=to+':'+from;if(CRITIQUE.pairs[k2])return CRITIQUE.pairs[k2];}
-  return null;
+  var cr=CRITIQUE.pairs[k];
+  if(!cr&&issym){k=to+':'+from;cr=CRITIQUE.pairs[k];}
+  if(!cr)return null;
+  var cpls=CRITIQUE.conceptPairLevels&&CRITIQUE.conceptPairLevels[preset];
+  if(cpls){
+    var ovr=cpls[from+':'+to];
+    if(!ovr&&issym)ovr=cpls[to+':'+from];
+    if(ovr)return {level:ovr, text:cr.text};
+  }
+  return cr;
 }
 function getCritType(id){
   if(!CRITIQUE||!CRITIQUE.types)return null;
@@ -275,7 +282,24 @@ function gpairs(ii){
   }
   return pairs;
 }
-function sc(p){var t=IX[p.ii];return t.sym?sym(p.from,p.to):ps(p.from,p.to);}
+function criLvl(from,to,issym){
+  if(typeof CRITIQUE==='undefined'||!CRITIQUE.pairs)return null;
+  var k=from+':'+to;
+  var cpls=CRITIQUE.conceptPairLevels&&CRITIQUE.conceptPairLevels[preset];
+  if(cpls){if(cpls[k])return cpls[k];if(issym&&cpls[to+':'+from])return cpls[to+':'+from];}
+  var cr=CRITIQUE.pairs[k];
+  if(!cr&&issym){cr=CRITIQUE.pairs[to+':'+from];}
+  return cr?cr.level:null;
+}
+function sc(p){
+  var t=IX[p.ii];
+  var base=t.sym?sym(p.from,p.to):ps(p.from,p.to);
+  if(base===0)return 0;
+  var lv=criLvl(p.from,p.to,t.sym);
+  if(lv==='speculative')return 0;
+  if(lv==='plausible')return 1;
+  return 2;
+}
 
 function draw(){
   var W=cv.width,H=cv.height,nr=NR();
@@ -610,8 +634,8 @@ function renderPT(){
 }
 function updateBadge(){
   var b=document.querySelector('.badge');if(!b)return;
-  var cc=CRITIQUE&&CRITIQUE.conceptConfidence&&CRITIQUE.conceptConfidence[preset];
-  if(cc){b.textContent=cc.score+'%';b.style.color=cc.score>=70?'#34d399':cc.score>=55?'#fbbf24':'#f87171';b.style.borderColor=cc.score>=70?'#34d399':cc.score>=55?'#fbbf24':'#f87171';b.style.background='color-mix(in srgb,'+(cc.score>=70?'#34d399':cc.score>=55?'#fbbf24':'#f87171')+' 12%,transparent)';}
+  var pct=document.getElementById('ovp');
+  if(pct){var v=parseInt(pct.textContent);b.textContent=v+'%';var c=v>=70?'#34d399':v>=55?'#fbbf24':'#f87171';b.style.color=c;b.style.borderColor=c;b.style.background='color-mix(in srgb,'+c+' 12%,transparent)';}
 }
 
 function showP(n,btn){
