@@ -159,6 +159,7 @@ canvas{display:block;}
   </div>
 </div>
 <script src="data.js"></script>
+<script src="data_critique.js"></script>
 <script>
 /* Инициализация из DATA */
 var TYPES=DATA.types;
@@ -491,10 +492,15 @@ function renderPT(){
     btn.onclick=function(){
       preset=k;IX=JSON.parse(JSON.stringify(PRESETS[k].types));filters=new Array(IX.length).fill(true);
       hovNode=null;hovArrow=null;selNode=null;hideLeft();
-      renderPT();renderLeg();renderOV();renderPL();draw();
+      renderPT();renderLeg();renderOV();renderPL();draw();updateBadge();
     };
     w.appendChild(btn);
   });
+}
+function updateBadge(){
+  var b=document.querySelector('.badge');if(!b||typeof CRITIQUE==='undefined')return;
+  var cc=CRITIQUE.conceptConfidence&&CRITIQUE.conceptConfidence[preset];
+  if(cc){b.textContent=cc.score+'%';b.style.color=cc.score>=70?'#34d399':cc.score>=55?'#fbbf24':'#f87171';b.style.borderColor=cc.score>=70?'#34d399':cc.score>=55?'#fbbf24':'#f87171';b.style.background='color-mix(in srgb,'+(cc.score>=70?'#34d399':cc.score>=55?'#fbbf24':'#f87171')+' 12%,transparent)';}
 }
 
 function showP(n,btn){
@@ -506,7 +512,7 @@ function showP(n,btn){
 
 window.addEventListener('load',function(){
   renderPT();renderLeg();renderRef();
-  resize();renderOV();renderPL();
+  resize();renderOV();renderPL();updateBadge();
 });
 </script>
 </body>
