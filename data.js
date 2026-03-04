@@ -231,7 +231,7 @@ var DATA = {
 
   presets: {
     classic: {
-      label: "Классика",
+      label: "Аутентичный",
       types: [
         { name: "Порождение",     color: "#f472b6", step: 1, sym: false, dashed: false },
         { name: "Сотрудничество", color: "#34d399", step: 4, sym: true,  dashed: false },

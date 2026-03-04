@@ -65,6 +65,7 @@ canvas{display:block;}
 .pg{border-bottom:1px solid var(--bd);padding:6px 12px 4px;}
 .pgh{font-size:.53rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:5px;}
 .pgsc{margin-left:auto;font-size:.64rem;color:var(--ok);}
+.pgd{font-size:.6rem;color:var(--mu2);margin-bottom:4px;line-height:1.4;}
 .pi{display:flex;align-items:center;gap:5px;padding:3px;border-radius:4px;margin-bottom:2px;transition:background .1s;}
 .pi:hover,.pi.lit{background:var(--bd);}
 .pi-ic{font-size:.67rem;width:14px;text-align:center;}
@@ -447,6 +448,8 @@ function renderPL(){
     var good=0;pairs.forEach(function(p){if(sc(p)===2)good++;});
     hd.innerHTML=t.name+' <span style="color:var(--mu2);font-size:.46rem">шаг '+t.step+'</span><span class="pgsc">'+good+'/'+pairs.length+'</span>';
     g.appendChild(hd);
+    var td=(IDESCS[preset]||IDESCS.classic)[ii];
+    if(td&&td.desc){var dd=document.createElement('div');dd.className='pgd';dd.textContent=td.desc;g.appendChild(dd);}
     for(var pi=0;pi<pairs.length;pi++){
       var p=pairs[pi],s=sc(p),lit=act&&(p.from===act||p.to===act);
       var item=document.createElement('div');item.className='pi'+(lit?' lit':'');
