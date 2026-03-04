@@ -7,7 +7,7 @@
 <style>
 :root{--bg:#05050d;--s1:#09091a;--s2:#0d0d20;--bd:#181830;--bd2:#222240;--tx:#e4e0f8;--mu:#3d3b65;--mu2:#6e6ba0;--ok:#34d399;}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;font-size:13px;height:100vh;display:grid;grid-template-rows:48px 1fr;overflow:hidden;}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;font-size:13px;height:100dvh;display:grid;grid-template-rows:48px 1fr;overflow:hidden;}
 header{display:flex;align-items:center;padding:0 14px;border-bottom:1px solid var(--bd);background:var(--s1);gap:9px;overflow:hidden;}
 h1{font-size:.88rem;font-weight:400;flex:1;white-space:nowrap;}
 .badge{font-size:.55rem;padding:2px 8px;border-radius:20px;background:color-mix(in srgb,var(--ok) 12%,transparent);border:1px solid var(--ok);color:var(--ok);}
@@ -118,7 +118,7 @@ canvas{display:block;}
   .ptabs button,.tabs button{padding:5px 11px;font-size:.65rem;}
   .tabs{order:2;margin-left:auto;}
   .ws{grid-template-columns:1fr;grid-template-rows:3fr 2fr;}
-  .lp{position:fixed;bottom:0;left:0;right:0;z-index:100;max-height:38vh;border-right:none;border-radius:16px 16px 0 0;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:0 -8px 30px rgba(0,0,0,.5);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  .lp{position:fixed;bottom:0;left:0;right:0;z-index:100;max-height:30vh;border-right:none;border-radius:16px 16px 0 0;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:0 -8px 30px rgba(0,0,0,.5);overflow-y:auto;-webkit-overflow-scrolling:touch;}
   .lp.mob-open{transform:translateY(0);}
   .lp-empty{display:none!important;}
   .mob-handle{display:block;}
@@ -228,7 +228,7 @@ var hovNode=null,hovArrow=null,selNode=null;
 var panX=0,panY=0,panTX=0,panTY=0,panRaf=0;
 function panStep(){var dx=panTX-panX,dy=panTY-panY;if(dx*dx+dy*dy<1){panX=panTX;panY=panTY;draw();panRaf=0;return;}panX+=dx*.18;panY+=dy*.18;draw();panRaf=requestAnimationFrame(panStep);}
 function setPan(tx,ty){panTX=tx;panTY=ty;if(!panRaf)panRaf=requestAnimationFrame(panStep);}
-function panToVisible(ids){if(!isMob())return;var nr=NR(),maxY;if(ids.length===1){var cy=cv.height/2,R=cv.width*.34;maxY=cy+R+nr;}else{maxY=-1e9;for(var i=0;i<ids.length;i++){var y=npos(ORDER.indexOf(ids[i])).y;if(y+nr>maxY)maxY=y+nr;}}var rect=cv.getBoundingClientRect(),sheetH=window.innerHeight*.38,visH=(window.innerHeight-sheetH-rect.top)*(cv.height/rect.height),pad=nr*.5;var ty=0;if(maxY+pad>visH)ty=visH-pad-maxY;setPan(0,Math.max(-cv.height*.5,Math.min(0,ty)));}
+function panToVisible(ids){if(!isMob())return;var nr=NR(),maxY;if(ids.length===1){var cy=cv.height/2,R=cv.width*.34;maxY=cy+R+nr;}else{maxY=-1e9;for(var i=0;i<ids.length;i++){var y=npos(ORDER.indexOf(ids[i])).y;if(y+nr>maxY)maxY=y+nr;}}var rect=cv.getBoundingClientRect(),sheetH=window.innerHeight*.30,visH=(window.innerHeight-sheetH-rect.top)*(cv.height/rect.height),pad=nr*.5;var ty=0;if(maxY+pad>visH)ty=visH-pad-maxY;setPan(0,Math.max(-cv.height*.5,Math.min(0,ty)));}
 function panReset(){setPan(0,0);}
 
 var cv=document.getElementById('cv');
