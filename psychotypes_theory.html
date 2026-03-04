@@ -241,15 +241,17 @@ function draw(){
       var p=pairs[pi];
       var lit=act&&(p.from===act||p.to===act);
       var arlit=hak===(ii+':'+p.from+':'+p.to);
-      var al=act?(lit?'dd':'88'):(arlit?'ff':'70');
-      var lw=lit?2.5:arlit?3:1.2;
+      var anyHL=act||hovArrow;
+      var al=lit?'dd':arlit?'ff':anyHL?'30':'70';
+      var lw=lit?2.5:arlit?3:anyHL?.8:1.2;
       var p1=npos(ORDER.indexOf(p.from)),p2=npos(ORDER.indexOf(p.to));
       darrow(p1.x,p1.y,p2.x,p2.y,t.color+al,lw,t.dashed,t.sym);
     }
   }
   for(var i=0;i<N;i++){
     var id=ORDER[i],p=npos(i),tc=byId(id);
-    var hov=id===hovNode,sel=id===selNode,isact=act&&id===act;
+    var isAN=hovArrow&&(id===hovArrow.from||id===hovArrow.to);
+    var hov=id===hovNode||isAN,sel=id===selNode,isact=(act&&id===act)||isAN;
     if(hov||sel){
       var g=ctx.createRadialGradient(p.x,p.y,nr*.3,p.x,p.y,nr*2.2);
       g.addColorStop(0,tc.color+'1c');g.addColorStop(1,tc.color+'00');
@@ -257,9 +259,10 @@ function draw(){
     }
     ctx.beginPath();ctx.arc(p.x,p.y,nr,0,Math.PI*2);
     ctx.fillStyle='#0d0d22';ctx.fill();
-    ctx.strokeStyle=(hov||sel)?tc.color:act&&!isact?tc.color+'80':tc.color+'50';
+    var anyHL2=act||hovArrow;
+    ctx.strokeStyle=(hov||sel)?tc.color:anyHL2&&!isact?tc.color+'30':tc.color+'50';
     ctx.lineWidth=(hov||sel)?2:1.5;ctx.stroke();
-    var name=nm(id),al2=act&&!isact?'cc':'ff';
+    var name=nm(id),al2=anyHL2&&!isact?'88':'ff';
     ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#e4e0f8'+al2;
     if(name.length<=7){ctx.font=nr*.5+'px system-ui';ctx.fillText(name,p.x,p.y);}
     else{ctx.font=nr*.41+'px system-ui';var mid=Math.ceil(name.length/2);ctx.fillText(name.slice(0,mid),p.x,p.y-nr*.22);ctx.fillText(name.slice(mid),p.x,p.y+nr*.22);}
@@ -295,10 +298,10 @@ cv.addEventListener('mousemove',function(e){
     var arrow=getArrowAt(c.x,c.y);
     var ak=arrow?(arrow.ii+':'+arrow.from+':'+arrow.to):null;
     var pk=hovArrow?(hovArrow.ii+':'+hovArrow.from+':'+hovArrow.to):null;
-    if(ak!==pk){hovArrow=arrow;draw();if(arrow)showLeftArrow(arrow);else hideLeft();}
+    if(ak!==pk){hovArrow=arrow;draw();if(arrow){showLeftArrow(arrow);highlightPairInList(arrow.ii,arrow.from,arrow.to);}else{hideLeft();clearPairHighlight();}}
   }
 });
-cv.addEventListener('mouseleave',function(){hovNode=null;hovArrow=null;draw();document.getElementById('hc').classList.remove('show');hideLeft();});
+cv.addEventListener('mouseleave',function(){hovNode=null;hovArrow=null;draw();document.getElementById('hc').classList.remove('show');hideLeft();clearPairHighlight();});
 cv.addEventListener('click',function(e){var c=cxy(e);var node=getNodeAt(c.x,c.y);selNode=selNode===node?null:node;draw();renderPL();});
 
 /* ─── Touch support ─── */
@@ -337,6 +340,8 @@ function updateMini(id){
 function isMob(){return window.innerWidth<=768;}
 function hideLeft(){document.getElementById('lp-body').classList.remove('show');document.getElementById('lp-empty').style.display='';document.getElementById('lp').classList.remove('mob-open');document.getElementById('mob-backdrop').classList.remove('show');}
 function showLeft(html){var b=document.getElementById('lp-body');b.innerHTML=html;b.classList.add('show');document.getElementById('lp-empty').style.display='none';if(isMob()){document.getElementById('lp').classList.add('mob-open');document.getElementById('mob-backdrop').classList.add('show');}}
+function highlightPairInList(ii,from,to){clearPairHighlight();var el=document.querySelector('.pi[data-pair="'+ii+':'+from+':'+to+'"]');if(el){el.classList.add('lit');el.scrollIntoView({block:'nearest',behavior:'smooth'});}}
+function clearPairHighlight(){var els=document.querySelectorAll('.pi.lit');for(var i=0;i<els.length;i++)els[i].classList.remove('lit');}
 
 function showLeftNode(id){
   var tc=byId(id);
@@ -438,11 +443,12 @@ function renderPL(){
     for(var pi=0;pi<pairs.length;pi++){
       var p=pairs[pi],s=sc(p),lit=act&&(p.from===act||p.to===act);
       var item=document.createElement('div');item.className='pi'+(lit?' lit':'');
+      item.setAttribute('data-pair',ii+':'+p.from+':'+p.to);
       item.innerHTML='<span class="pi-ic">'+(s===2?'✅':s===1?'⚠️':'❌')+'</span><span class="pi-fr" style="color:'+t.color+'">'+nm(p.from)+'</span><span class="pi-ar" style="color:'+t.color+'">'+(t.sym?'↔':'→')+'</span><span class="pi-to">'+nm(p.to)+'</span>';
-      (function(pf){
-        item.addEventListener('mouseenter',function(){selNode=pf;draw();});
-        item.addEventListener('mouseleave',function(){selNode=null;draw();});
-      })(p.from);
+      (function(pp,iii){
+        item.addEventListener('mouseenter',function(){hovArrow={ii:iii,from:pp.from,to:pp.to};hovNode=null;draw();showLeftArrow(hovArrow);});
+        item.addEventListener('mouseleave',function(){hovArrow=null;draw();hideLeft();});
+      })(p,ii);
       g.appendChild(item);
     }
     list.appendChild(g);
