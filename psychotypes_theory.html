@@ -11,6 +11,7 @@ body{background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;font-
 header{display:flex;align-items:center;padding:0 14px;border-bottom:1px solid var(--bd);background:var(--s1);gap:9px;overflow:hidden;}
 h1{font-size:.88rem;font-weight:400;flex:1;white-space:nowrap;}
 .badge{font-size:.55rem;padding:2px 8px;border-radius:20px;background:color-mix(in srgb,var(--ok) 12%,transparent);border:1px solid var(--ok);color:var(--ok);}
+.ptl{font-size:.58rem;color:var(--mu2);white-space:nowrap;}
 .ptabs,.tabs{display:flex;gap:2px;}
 button{padding:3px 9px;border-radius:4px;font-size:.58rem;cursor:pointer;border:1px solid var(--bd2);background:transparent;color:var(--mu2);transition:all .15s;white-space:nowrap;font-family:inherit;}
 button:hover{color:var(--tx);border-color:var(--mu2);}
@@ -94,6 +95,7 @@ canvas{display:block;}
   header{flex-wrap:wrap;padding:6px 10px;gap:4px 8px;height:auto;min-height:42px;}
   h1{font-size:.78rem;flex-basis:50%;min-width:0;}
   .badge{order:1;}
+  .ptl{display:none;}
   .ptabs{order:4;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
   .ptabs button,.tabs button{padding:5px 11px;font-size:.65rem;}
   .tabs{order:2;margin-left:auto;}
@@ -123,7 +125,7 @@ canvas{display:block;}
 <header>
   <h1>Психотипы · Теория взаимодействий</h1>
   <span class="badge">100%</span>
-  <div class="ptabs" id="ptabs"></div>
+  <span class="ptl">Концепция:</span><div class="ptabs" id="ptabs"></div>
   <div class="tabs">
     <button class="on" onclick="showP('diagram',this)">Диаграмма</button>
     <button onclick="showP('reference',this)">Справочник</button>
@@ -180,6 +182,7 @@ function getPD(from,to,issym){
 }
 
 var IDESCS=DATA.interactionDescriptions;
+var TDESCS=DATA.typeDescriptions;
 var PRESETS=DATA.presets;
 
 var preset='classic';
@@ -353,6 +356,7 @@ function clearPairHighlight(){var els=document.querySelectorAll('.pi.lit');for(v
 
 function showLeftNode(id){
   var tc=byId(id);
+  var td=(TDESCS[preset]||TDESCS.classic)[id]||{desc:tc.desc,adj:tc.adj};
   var rows='';
   for(var ii=0;ii<IX.length;ii++){
     var t=IX[ii],pairs=gpairs(ii);
@@ -367,8 +371,8 @@ function showLeftNode(id){
     '<div class="lp-tag" style="background:color-mix(in srgb,'+tc.color+' 12%,transparent);color:'+tc.color+';border:1px solid '+tc.color+'40">ПСИХОТИП</div>'
     +'<div class="lp-name"><span class="lp-dot" style="background:'+tc.color+'"></span>'+tc.name+'</div>'
     +'<div class="lp-sl">Характеристика</div>'
-    +'<div class="lp-desc">'+tc.desc+'</div>'
-    +(tc.adj?'<div class="lp-note">'+tc.adj+'</div>':'')
+    +'<div class="lp-desc">'+td.desc+'</div>'
+    +(td.adj?'<div class="lp-note">'+td.adj+'</div>':'')
     +(rows?'<div class="lp-div"></div><div class="lp-sl">Взаимодействия</div><div class="lp-rows">'+rows+'</div>':'')
   );
 }
