@@ -197,9 +197,10 @@ function sym(a,b){return Math.round((ps(a,b)+ps(b,a))/2);}
 
 var PD=DATA.pairDescriptions;
 function getPD(from,to,issym){
+  var pd=PD[preset]||PD.classic;
   var k=from+':'+to;
-  if(PD[k])return PD[k];
-  if(issym){var k2=to+':'+from;if(PD[k2])return PD[k2];}
+  if(pd[k])return pd[k];
+  if(issym){var k2=to+':'+from;if(pd[k2])return pd[k2];}
   return null;
 }
 
@@ -602,10 +603,15 @@ function renderPT(){
     btn.onclick=function(){
       preset=k;IX=JSON.parse(JSON.stringify(PRESETS[k].types));filters=new Array(IX.length).fill(true);
       hovNode=null;hovArrow=null;selNode=null;hideLeft();
-      renderPT();renderLeg();renderOV();renderPL();draw();
+      renderPT();renderLeg();renderOV();renderPL();draw();updateBadge();
     };
     w.appendChild(btn);
   });
+}
+function updateBadge(){
+  var b=document.querySelector('.badge');if(!b)return;
+  var cc=CRITIQUE&&CRITIQUE.conceptConfidence&&CRITIQUE.conceptConfidence[preset];
+  if(cc){b.textContent=cc.score+'%';b.style.color=cc.score>=70?'#34d399':cc.score>=55?'#fbbf24':'#f87171';b.style.borderColor=cc.score>=70?'#34d399':cc.score>=55?'#fbbf24':'#f87171';b.style.background='color-mix(in srgb,'+(cc.score>=70?'#34d399':cc.score>=55?'#fbbf24':'#f87171')+' 12%,transparent)';}
 }
 
 function showP(n,btn){
@@ -617,7 +623,7 @@ function showP(n,btn){
 
 window.addEventListener('load',function(){
   renderPT();renderLeg();renderRef();
-  resize();renderOV();renderPL();
+  resize();renderOV();renderPL();updateBadge();
 });
 </script>
 </body>

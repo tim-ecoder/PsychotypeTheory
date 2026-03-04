@@ -175,9 +175,10 @@ function sym(a,b){return Math.round((ps(a,b)+ps(b,a))/2);}
 
 var PD=DATA.pairDescriptions;
 function getPD(from,to,issym){
+  var pd=PD[preset]||PD.classic;
   var k=from+':'+to;
-  if(PD[k])return PD[k];
-  if(issym){var k2=to+':'+from;if(PD[k2])return PD[k2];}
+  if(pd[k])return pd[k];
+  if(issym){var k2=to+':'+from;if(pd[k2])return pd[k2];}
   return null;
 }
 
