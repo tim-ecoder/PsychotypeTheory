@@ -225,6 +225,11 @@ var preset='classic';
 var IX=JSON.parse(JSON.stringify(PRESETS.classic.types));
 var filters=[true,true,true,true];
 var hovNode=null,hovArrow=null,selNode=null;
+var panX=0,panY=0,panTX=0,panTY=0,panRaf=0;
+function panStep(){var dx=panTX-panX,dy=panTY-panY;if(dx*dx+dy*dy<1){panX=panTX;panY=panTY;draw();panRaf=0;return;}panX+=dx*.18;panY+=dy*.18;draw();panRaf=requestAnimationFrame(panStep);}
+function setPan(tx,ty){panTX=tx;panTY=ty;if(!panRaf)panRaf=requestAnimationFrame(panStep);}
+function panToVisible(ids){if(!isMob()){return;}var sy=0,n=ids.length;for(var i=0;i<n;i++){sy+=npos(ORDER.indexOf(ids[i])).y;}var my=sy/n,ty=cv.height*.33-my;ty=Math.max(-cv.height*.3,Math.min(cv.height*.3,ty));setPan(0,ty);}
+function panReset(){setPan(0,0);}
 
 var cv=document.getElementById('cv');
 var ctx=cv.getContext('2d');
@@ -270,6 +275,7 @@ function sc(p){var t=IX[p.ii];return t.sym?sym(p.from,p.to):ps(p.from,p.to);}
 function draw(){
   var W=cv.width,H=cv.height,nr=NR();
   ctx.clearRect(0,0,W,H);
+  ctx.save();ctx.translate(panX,panY);
   ctx.beginPath();ctx.arc(W/2,H/2,W*.34,0,Math.PI*2);ctx.strokeStyle='#18183030';ctx.lineWidth=1;ctx.stroke();
   var act=hovNode||selNode;
   var hak=hovArrow?(hovArrow.ii+':'+hovArrow.from+':'+hovArrow.to):null;
@@ -307,6 +313,7 @@ function draw(){
     if(name.length<=7){ctx.font=nr*.5+'px system-ui';ctx.fillText(name,p.x,p.y);}
     else{ctx.font=nr*.41+'px system-ui';var mid=Math.ceil(name.length/2);ctx.fillText(name.slice(0,mid),p.x,p.y-nr*.22);ctx.fillText(name.slice(mid),p.x,p.y+nr*.22);}
   }
+  ctx.restore();
 }
 
 function getNodeAt(x,y){var nr=NR();for(var i=0;i<N;i++){var p=npos(i),dx=x-p.x,dy=y-p.y;if(dx*dx+dy*dy<=nr*nr)return ORDER[i];}return null;}
@@ -327,7 +334,7 @@ function getArrowAt(x,y){
   }
   return best;
 }
-function cxy(e){var r=cv.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return{x:(s.clientX-r.left)*(cv.width/r.width),y:(s.clientY-r.top)*(cv.height/r.height)};}
+function cxy(e){var r=cv.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return{x:(s.clientX-r.left)*(cv.width/r.width)-panX,y:(s.clientY-r.top)*(cv.height/r.height)-panY};}
 
 cv.addEventListener('mousemove',function(e){
   var c=cxy(e);
@@ -349,14 +356,14 @@ cv.addEventListener('touchstart',function(e){
   if(e.touches.length!==1)return;
   var c=cxy(e);
   var node=getNodeAt(c.x,c.y);
-  if(node){selNode=selNode===node?null:node;hovNode=node;draw();updateMini(node);showLeftNode(node);renderPL();e.preventDefault();return;}
+  if(node){var was=selNode===node;selNode=was?null:node;hovNode=node;hovArrow=null;if(!was){panToVisible([node]);}else{panReset();}draw();updateMini(node);if(!was){showLeftNode(node);}else{hideLeft();}renderPL();e.preventDefault();return;}
   var arrow=getArrowAt(c.x,c.y);
-  if(arrow){hovArrow=arrow;draw();showLeftArrow(arrow);e.preventDefault();return;}
-  selNode=null;hovNode=null;hovArrow=null;draw();hideLeft();renderPL();
+  if(arrow){hovArrow=arrow;hovNode=null;selNode=null;panToVisible([arrow.from,arrow.to]);draw();showLeftArrow(arrow);highlightPairInList(arrow.ii,arrow.from,arrow.to);e.preventDefault();return;}
+  selNode=null;hovNode=null;hovArrow=null;panReset();draw();hideLeft();clearPairHighlight();renderPL();
 },{passive:false});
 
-document.getElementById('mob-backdrop').addEventListener('click',function(){hideLeft();});
-document.getElementById('mob-close').addEventListener('click',function(){hideLeft();});
+document.getElementById('mob-backdrop').addEventListener('click',function(){hovArrow=null;hovNode=null;selNode=null;panReset();draw();hideLeft();clearPairHighlight();renderPL();});
+document.getElementById('mob-close').addEventListener('click',function(){hovArrow=null;hovNode=null;selNode=null;panReset();draw();hideLeft();clearPairHighlight();renderPL();});
 
 function updateMini(id){
   var card=document.getElementById('hc');
@@ -516,8 +523,9 @@ function renderPL(){
       item.setAttribute('data-pair',ii+':'+p.from+':'+p.to);
       item.innerHTML='<span class="pi-ic">'+(s===2?'\u2705':s===1?'\u26a0\ufe0f':'\u274c')+'</span><span class="pi-fr" style="color:'+t.color+'">'+nm(p.from)+'</span><span class="pi-ar" style="color:'+t.color+'">'+(t.sym?'\u2194':'\u2192')+'</span><span class="pi-to">'+nm(p.to)+'</span>'+badge;
       (function(pp,iii){
-        item.addEventListener('mouseenter',function(){hovArrow={ii:iii,from:pp.from,to:pp.to};hovNode=null;draw();showLeftArrow(hovArrow);});
-        item.addEventListener('mouseleave',function(){hovArrow=null;draw();hideLeft();});
+        item.addEventListener('mouseenter',function(){if(isMob())return;hovArrow={ii:iii,from:pp.from,to:pp.to};hovNode=null;draw();showLeftArrow(hovArrow);});
+        item.addEventListener('mouseleave',function(){if(isMob())return;hovArrow=null;draw();hideLeft();});
+        item.addEventListener('click',function(){if(!isMob())return;hovArrow={ii:iii,from:pp.from,to:pp.to};hovNode=null;selNode=null;panToVisible([pp.from,pp.to]);draw();showLeftArrow(hovArrow);});
       })(p,ii);
       g.appendChild(item);
     }
