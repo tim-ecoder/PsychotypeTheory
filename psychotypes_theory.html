@@ -188,7 +188,7 @@ var hovNode=null,hovArrow=null,selNode=null;
 var panX=0,panY=0,panTX=0,panTY=0,panRaf=0;
 function panStep(){var dx=panTX-panX,dy=panTY-panY;if(dx*dx+dy*dy<1){panX=panTX;panY=panTY;draw();panRaf=0;return;}panX+=dx*.18;panY+=dy*.18;draw();panRaf=requestAnimationFrame(panStep);}
 function setPan(tx,ty){panTX=tx;panTY=ty;if(!panRaf)panRaf=requestAnimationFrame(panStep);}
-function panToVisible(ids){if(!isMob())return;var nr=NR(),minY,maxY;if(ids.length===1){var cy=cv.height/2,R=cv.width*.34;minY=cy-R-nr;maxY=cy+R+nr;}else{minY=1e9;maxY=-1e9;for(var i=0;i<ids.length;i++){var y=npos(ORDER.indexOf(ids[i])).y;if(y-nr<minY)minY=y-nr;if(y+nr>maxY)maxY=y+nr;}}var rect=cv.getBoundingClientRect(),sheetH=window.innerHeight*.38,visH=(window.innerHeight-sheetH-rect.top)*(cv.height/rect.height),pad=nr*.5;var ty=0;if(maxY+pad>visH)ty=visH-pad-maxY;if(minY+ty<pad)ty=pad-minY;setPan(0,Math.max(-cv.height*.5,Math.min(cv.height*.5,ty)));}
+function panToVisible(ids){if(!isMob())return;var nr=NR(),minY,maxY;if(ids.length===1){var cy=cv.height/2,R=cv.width*.34;minY=cy-R-nr;maxY=cy+R+nr;}else{minY=1e9;maxY=-1e9;for(var i=0;i<ids.length;i++){var y=npos(ORDER.indexOf(ids[i])).y;if(y-nr<minY)minY=y-nr;if(y+nr>maxY)maxY=y+nr;}}var rect=cv.getBoundingClientRect(),sheetH=window.innerHeight*.38,visH=(window.innerHeight-sheetH-rect.top)*(cv.height/rect.height),pad=nr*.5;var ty=0;if(maxY+pad>visH)ty=visH-pad-maxY;if(minY+ty<0)ty=-minY;setPan(0,Math.max(-cv.height*.5,Math.min(cv.height*.5,ty)));}
 function panReset(){setPan(0,0);}
 
 var cv=document.getElementById('cv');
