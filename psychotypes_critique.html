@@ -236,7 +236,7 @@ var PRESETS=DATA.presets;
 var preset='classic';
 var IX=JSON.parse(JSON.stringify(PRESETS.classic.types));
 var filters=[true,true,true,true];
-var hovNode=null,hovArrow=null,selNode=null;
+var hovNode=null,hovArrow=null,selNode=null,selArrow=null;
 var panX=0,panY=0,panTX=0,panTY=0,panRaf=0;
 function panStep(){var dx=panTX-panX,dy=panTY-panY;if(dx*dx+dy*dy<1){panX=panTX;panY=panTY;draw();panRaf=0;return;}panX+=dx*.18;panY+=dy*.18;draw();panRaf=requestAnimationFrame(panStep);}
 function setPan(tx,ty){panTX=tx;panTY=ty;if(!panRaf)panRaf=requestAnimationFrame(panStep);}
@@ -312,7 +312,8 @@ function draw(){
   ctx.save();ctx.translate(panX,panY);
   ctx.beginPath();ctx.arc(W/2,H/2,W*.34,0,Math.PI*2);ctx.strokeStyle='#18183030';ctx.lineWidth=1;ctx.stroke();
   var act=hovNode||selNode;
-  var hak=hovArrow?(hovArrow.ii+':'+hovArrow.from+':'+hovArrow.to):null;
+  var eA=hovArrow||selArrow;
+  var hak=eA?(eA.ii+':'+eA.from+':'+eA.to):null;
   for(var ii=0;ii<IX.length;ii++){
     if(!filters[ii])continue;
     var t=IX[ii];
@@ -321,7 +322,7 @@ function draw(){
       var p=pairs[pi];
       var lit=act&&(p.from===act||p.to===act);
       var arlit=hak===(ii+':'+p.from+':'+p.to);
-      var anyHL=act||hovArrow;
+      var anyHL=act||eA;
       var al=lit?'dd':arlit?'ff':anyHL?'30':'70';
       var lw=lit?2.5:arlit?3:anyHL?.8:1.2;
       var p1=npos(ORDER.indexOf(p.from)),p2=npos(ORDER.indexOf(p.to));
@@ -330,7 +331,7 @@ function draw(){
   }
   for(var i=0;i<N;i++){
     var id=ORDER[i],p=npos(i),tc=byId(id);
-    var isAN=hovArrow&&(id===hovArrow.from||id===hovArrow.to);
+    var isAN=eA&&(id===eA.from||id===eA.to);
     var hov=id===hovNode||isAN,sel=id===selNode,isact=(act&&id===act)||isAN;
     if(hov||sel){
       var g=ctx.createRadialGradient(p.x,p.y,nr*.3,p.x,p.y,nr*2.2);
@@ -339,7 +340,7 @@ function draw(){
     }
     ctx.beginPath();ctx.arc(p.x,p.y,nr,0,Math.PI*2);
     ctx.fillStyle='#0d0d22';ctx.fill();
-    var anyHL2=act||hovArrow;
+    var anyHL2=act||eA;
     ctx.strokeStyle=(hov||sel)?tc.color:anyHL2&&!isact?tc.color+'30':tc.color+'50';
     ctx.lineWidth=(hov||sel)?2:1.5;ctx.stroke();
     var name=nm(id),al2=anyHL2&&!isact?'88':'ff';
@@ -373,17 +374,27 @@ function cxy(e){var r=cv.getBoundingClientRect(),s=e.touches?e.touches[0]:e;retu
 cv.addEventListener('mousemove',function(e){
   var c=cxy(e);
   var node=getNodeAt(c.x,c.y);
+  var pn=hovNode;
   if(node!==hovNode){hovNode=node;draw();updateMini(node);}
   if(node){hovArrow=null;showLeftNode(node);}
   else{
     var arrow=getArrowAt(c.x,c.y);
     var ak=arrow?(arrow.ii+':'+arrow.from+':'+arrow.to):null;
     var pk=hovArrow?(hovArrow.ii+':'+hovArrow.from+':'+hovArrow.to):null;
-    if(ak!==pk){hovArrow=arrow;draw();if(arrow){showLeftArrow(arrow);highlightPairInList(arrow.ii,arrow.from,arrow.to);}else{hideLeft();clearPairHighlight();}}
+    var ch=ak!==pk||pn;
+    if(ak!==pk){hovArrow=arrow;draw();}
+    if(ch){if(arrow){showLeftArrow(arrow);highlightPairInList(arrow.ii,arrow.from,arrow.to);}else if(selArrow){showLeftArrow(selArrow);highlightPairInList(selArrow.ii,selArrow.from,selArrow.to);}else{hideLeft();clearPairHighlight();}}
   }
 });
-cv.addEventListener('mouseleave',function(){hovNode=null;hovArrow=null;draw();document.getElementById('hc').classList.remove('show');hideLeft();clearPairHighlight();});
-cv.addEventListener('click',function(e){var c=cxy(e);var node=getNodeAt(c.x,c.y);selNode=selNode===node?null:node;draw();renderPL();});
+cv.addEventListener('mouseleave',function(){hovNode=null;hovArrow=null;draw();document.getElementById('hc').classList.remove('show');if(selArrow){showLeftArrow(selArrow);highlightPairInList(selArrow.ii,selArrow.from,selArrow.to);}else{hideLeft();clearPairHighlight();}});
+cv.addEventListener('click',function(e){
+  var c=cxy(e);
+  var node=getNodeAt(c.x,c.y);
+  if(node){selNode=selNode===node?null:node;selArrow=null;draw();renderPL();return;}
+  var arrow=getArrowAt(c.x,c.y);
+  if(arrow){var sak=selArrow?(selArrow.ii+':'+selArrow.from+':'+selArrow.to):'';var nak=arrow.ii+':'+arrow.from+':'+arrow.to;selArrow=sak===nak?null:arrow;selNode=null;hovArrow=selArrow;draw();if(selArrow){showLeftArrow(selArrow);highlightPairInList(selArrow.ii,selArrow.from,selArrow.to);}else{hideLeft();clearPairHighlight();}renderPL();return;}
+  selNode=null;selArrow=null;hovArrow=null;draw();hideLeft();clearPairHighlight();renderPL();
+});
 
 /* ─── Touch support ─── */
 cv.addEventListener('touchstart',function(e){
@@ -393,11 +404,11 @@ cv.addEventListener('touchstart',function(e){
   if(node){var was=selNode===node;selNode=was?null:node;hovNode=node;hovArrow=null;if(!was){panToVisible([node]);}else{panReset();}draw();updateMini(node);if(!was){showLeftNode(node);}else{hideLeft();}renderPL();e.preventDefault();return;}
   var arrow=getArrowAt(c.x,c.y);
   if(arrow){hovArrow=arrow;hovNode=null;selNode=null;panToVisible([arrow.from,arrow.to]);draw();showLeftArrow(arrow);highlightPairInList(arrow.ii,arrow.from,arrow.to);e.preventDefault();return;}
-  selNode=null;hovNode=null;hovArrow=null;panReset();draw();hideLeft();clearPairHighlight();renderPL();
+  selNode=null;selArrow=null;hovNode=null;hovArrow=null;panReset();draw();hideLeft();clearPairHighlight();renderPL();
 },{passive:false});
 
-document.getElementById('mob-backdrop').addEventListener('click',function(){hovArrow=null;hovNode=null;selNode=null;panReset();draw();hideLeft();clearPairHighlight();renderPL();});
-document.getElementById('mob-close').addEventListener('click',function(){hovArrow=null;hovNode=null;selNode=null;panReset();draw();hideLeft();clearPairHighlight();renderPL();});
+document.getElementById('mob-backdrop').addEventListener('click',function(){hovArrow=null;hovNode=null;selNode=null;selArrow=null;panReset();draw();hideLeft();clearPairHighlight();renderPL();});
+document.getElementById('mob-close').addEventListener('click',function(){hovArrow=null;hovNode=null;selNode=null;selArrow=null;panReset();draw();hideLeft();clearPairHighlight();renderPL();});
 
 function updateMini(id){
   var card=document.getElementById('hc');
@@ -632,7 +643,7 @@ function renderPT(){
     btn.textContent=p.label;
     btn.onclick=function(){
       preset=k;IX=JSON.parse(JSON.stringify(PRESETS[k].types));filters=new Array(IX.length).fill(true);
-      hovNode=null;hovArrow=null;selNode=null;hideLeft();
+      hovNode=null;hovArrow=null;selNode=null;selArrow=null;hideLeft();
       renderPT();renderLeg();renderOV();renderPL();draw();updateBadge();
     };
     w.appendChild(btn);
